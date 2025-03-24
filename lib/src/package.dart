@@ -509,40 +509,40 @@ Package `$override` at `${overriddenWorkspacePackage.presentationDir}` is overri
     }
   }
 
-  // Check for pubspec.yaml files between the root and any workspace package.
-  final visited = <String>{
-    // By adding this to visited we will never go above the workspaceRoot.dir.
-    p.canonicalize(root.dir),
-  };
-  for (final package in root.transitiveWorkspace
-  // We don't want to look at the roots parents. The first package is always
-  // the root, so skip that.
-  .skip(1)) {
-    // Run through all parent directories until we meet another workspace
-    // package.
-    for (final dir in parentDirs(package.dir).skip(1)) {
-      // Stop if we meet another package directory.
-      if (includedFrom.containsKey(p.canonicalize(dir))) {
-        break;
-      }
-      if (!visited.add(p.canonicalize(dir))) {
-        // We have been here before.
-        break;
-      }
-      final pubspecCandidate = p.join(dir, 'pubspec.yaml');
-      if (fileExists(pubspecCandidate)) {
-        fail('''
-The file `$pubspecCandidate` is located in a directory between the workspace root at
-`${root.dir}` and a workspace package at `${package.dir}`. But is not a member of the
-workspace.
+  //   // Check for pubspec.yaml files between the root and any workspace package.
+  //   final visited = <String>{
+  //     // By adding this to visited we will never go above the workspaceRoot.dir.
+  //     p.canonicalize(root.dir),
+  //   };
+  //   for (final package in root.transitiveWorkspace
+  //   // We don't want to look at the roots parents. The first package is always
+  //   // the root, so skip that.
+  //   .skip(1)) {
+  //     // Run through all parent directories until we meet another workspace
+  //     // package.
+  //     for (final dir in parentDirs(package.dir).skip(1)) {
+  //       // Stop if we meet another package directory.
+  //       if (includedFrom.containsKey(p.canonicalize(dir))) {
+  //         break;
+  //       }
+  //       if (!visited.add(p.canonicalize(dir))) {
+  //         // We have been here before.
+  //         break;
+  //       }
+  //       final pubspecCandidate = p.join(dir, 'pubspec.yaml');
+  //       if (fileExists(pubspecCandidate)) {
+  //         fail('''
+  // The file `$pubspecCandidate` is located in a directory between the workspace root at
+  // `${root.dir}` and a workspace package at `${package.dir}`. But is not a member of the
+  // workspace.
 
-This blocks the resolution of the package at `${package.dir}`.
+  // This blocks the resolution of the package at `${package.dir}`.
 
-Consider removing it.
+  // Consider removing it.
 
-See https://dart.dev/go/workspaces-stray-files for details.
-''');
-      }
-    }
-  }
+  // See https://dart.dev/go/workspaces-stray-files for details.
+  // ''');
+  //       }
+  //     }
+  //   }
 }
