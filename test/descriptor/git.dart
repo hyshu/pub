@@ -36,6 +36,15 @@ class GitRepoDescriptor extends DirectoryDescriptor {
     ]);
   }
 
+  /// Adds a tag named [tag] to the repo described by `this`.
+  ///
+  /// [parent] defaults to [sandbox].
+  Future tag(String tag, [String? parent]) async {
+    await _runGitCommands(parent, [
+      ['tag', '-a', tag, '-m', 'Some message'],
+    ]);
+  }
+
   /// Return a Future that completes to the commit in the git repository
   /// referred to by [ref].
   ///
@@ -60,8 +69,8 @@ class GitRepoDescriptor extends DirectoryDescriptor {
       'GIT_COMMITTER_NAME': 'Pub Test',
       'GIT_COMMITTER_EMAIL': 'pub@dartlang.org',
       // To make stable commits ids we fix the date.
-      'GIT_COMMITTER_DATE': DateTime(1970).toIso8601String(),
-      'GIT_AUTHOR_DATE': DateTime(1970).toIso8601String(),
+      'GIT_COMMITTER_DATE': DateTime.utc(1970).toIso8601String(),
+      'GIT_AUTHOR_DATE': DateTime.utc(1970).toIso8601String(),
     };
 
     return git.run(
