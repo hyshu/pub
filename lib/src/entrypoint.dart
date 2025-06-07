@@ -402,10 +402,12 @@ See $workspacesDocUrl for more information.''',
   /// If the workspace is non-trivial: For each package in the workspace write:
   /// `.dart_tool/pub/workspace_ref.json` with a pointer to the workspace root
   /// package dir.
+  ///
+  /// Also marks the package active in `PUB_CACHE/active_roots/`.
   Future<void> writePackageConfigFiles() async {
     ensureDir(p.dirname(packageConfigPath));
 
-    _writeIfDifferent(
+    writeTextFileIfDifferent(
       packageConfigPath,
       await _packageConfigFile(
         cache,
@@ -416,7 +418,7 @@ See $workspacesDocUrl for more information.''',
                 ?.effectiveConstraint,
       ),
     );
-    _writeIfDifferent(packageGraphPath, await _packageGraphFile(cache));
+    writeTextFileIfDifferent(packageGraphPath, await _packageGraphFile(cache));
 
     if (workspaceRoot.workspaceChildren.isNotEmpty) {
       for (final package in workspaceRoot.transitiveWorkspace) {
@@ -430,8 +432,11 @@ See $workspacesDocUrl for more information.''',
         final workspaceRef = const JsonEncoder.withIndent(
           '  ',
         ).convert({'workspaceRoot': relativeRootPath});
-        writeTextFile(workspaceRefPath, '$workspaceRef\n');
+        writeTextFileIfDifferent(workspaceRefPath, '$workspaceRef\n');
       }
+    }
+    if (lockFile.packages.values.any((id) => id.source is CachedSource)) {
+      cache.markRootActive(packageConfigPath);
     }
   }
 
@@ -524,17 +529,6 @@ See $workspacesDocUrl for more information.''',
       '  ',
     ).convert(packageConfig.toJson());
     return '$jsonText\n';
-  }
-
-  void _writeIfDifferent(String path, String newContent) {
-    // Compare to the present package_config.json
-    // For purposes of equality we don't care about the `generated` timestamp.
-    final originalText = tryReadTextFile(path);
-    if (originalText != newContent) {
-      writeTextFile(path, newContent);
-    } else {
-      log.fine('`$path` is unchanged. Not rewriting.');
-    }
   }
 
   /// Gets all dependencies of the [workspaceRoot] package.
